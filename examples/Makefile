@@ -11,16 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ifeq ($(RTE_SDK),)
-$(error "Please define RTE_SDK environment variable")
-endif
-
 ifeq ($(TLDK_ROOT),)
 $(error "Please define TLDK_SDK environment variable")
 endif
 
-include $(RTE_SDK)/mk/rte.vars.mk
-
 DIRS-y += l4fwd
 
-include $(TLDK_ROOT)/mk/tle.subdir.mk
+PKG_CONFIG := pkg-config
+DPDK_CFLAGS := $(shell $(PKG_CONFIG) --cflags libdpdk)
+DPDK_LIBS := $(shell $(PKG_CONFIG) --libs libdpdk)
+
+export TLDK_ROOT DPDK_CFLAGS DPDK_LIBS
+
+.PHONY: all clean $(DIRS-y)
+
+all: $(DIRS-y)
+
+clean: $(DIRS-y)
+
+$(DIRS-y):
+	$(Q)$(MAKE) -C $@ \
+		CFLAGS+=$(DPDK_CFLAGS) \
+		LDLIBS+=$(DPDK_LIBS) -lpthread

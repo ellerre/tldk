@@ -13,6 +13,10 @@
 
 EXTLIB_BUILD := y
 
+PKG_CONFIG := pkg-config
+DPDK_CFLAGS := $(shell $(PKG_CONFIG) --cflags libdpdk)
+DPDK_LIBS := $(shell $(PKG_CONFIG) --libs libdpdk)
+
 # we must create the output dir first and recall the same Makefile
 # from this directory
 ifeq ($(NOT_FIRST_CALL),)
@@ -24,13 +28,17 @@ BDIR := $(RTE_OUTPUT)/build/$(CUR_SUBDIR)
 
 all:
 	$(Q)mkdir -p $(BDIR)
-	$(Q)$(MAKE) -C $(BDIR) -f $(RTE_EXTMK) \
-		S=$(RTE_SRCDIR) O=$(RTE_OUTPUT) SRCDIR=$(RTE_SRCDIR)
+	$(Q)$(MAKE) -C $(BDIR) \
+		CFLAGS="$(CFLAGS) $(DPDK_CFLAGS)" \
+		LDLIBS="$(LDLIBS) $(DPDK_LIBS)" \
+		-f $(RTE_EXTMK) S=$(RTE_SRCDIR) O=$(RTE_OUTPUT) SRCDIR=$(RTE_SRCDIR)
 
 %::
 	$(Q)mkdir -p $(BDIR)
-	$(Q)$(MAKE) -C $(BDIR) -f $(RTE_EXTMK) $@ \
-		S=$(RTE_SRCDIR) O=$(RTE_OUTPUT) SRCDIR=$(RTE_SRCDIR)
+	$(Q)$(MAKE) -C $(BDIR) \
+		CFLAGS="$(CFLAGS) $(DPDK_CFLAGS)" \
+		LDLIBS="$(LDLIBS) $(DPDK_LIBS)" \
+		-f $(RTE_EXTMK) S=$(RTE_SRCDIR) O=$(RTE_OUTPUT) SRCDIR=$(RTE_SRCDIR) $@
 else
-include $(RTE_SDK)/mk/rte.lib.mk
+$(error "Recursive make call not supported. Please update the makefiles.")
 endif

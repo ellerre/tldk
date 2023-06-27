@@ -11,38 +11,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ifeq ($(RTE_SDK),)
-$(error "Please define RTE_SDK environment variable")
-endif
-
-ifeq ($(RTE_TARGET),)
-$(error "Please define RTE_TARGET environment variable")
-endif
-
 ifeq ($(TLDK_ROOT),)
 $(error "Please define TLDK_ROOT environment variable")
 endif
 
-include $(RTE_SDK)/mk/rte.vars.mk
-
-# binary name
 APP = l4fwd
+SRCS-y += parse.c pkt.c main.c
 
-# all source are stored in SRCS-y
-SRCS-y += parse.c
-SRCS-y += pkt.c
-SRCS-y += main.c
+PKG_CONFIG := pkg-config
+DPDK_CFLAGS := $(shell $(PKG_CONFIG) --cflags libdpdk)
+DPDK_LIBS := $(shell $(PKG_CONFIG) --libs libdpdk)
 
-CFLAGS += $(WERROR_FLAGS)
+CFLAGS += $(WERROR_FLAGS) $(DPDK_CFLAGS)
 CFLAGS += -I$(RTE_OUTPUT)/include
 
 LDLIBS += -L$(RTE_OUTPUT)/lib
-LDLIBS += -ltle_l4p
-LDLIBS += -ltle_memtank
-LDLIBS += -ltle_timer
+LDLIBS += $(shell $(PKG_CONFIG) --libs libtle_l4p)
+LDLIBS += $(shell $(PKG_CONFIG) --libs libtle_memtank)
+LDLIBS += $(shell $(PKG_CONFIG) --libs libtle_timer)
 
 EXTRA_CFLAGS += -O3
 CFLAGS_parse.o += -D_GNU_SOURCE
 CFLAGS_main.o += -D_GNU_SOURCE
 
 include $(TLDK_ROOT)/mk/tle.app.mk
+
+

@@ -11,20 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ifeq ($(RTE_SDK),)
-$(error "Please define RTE_SDK environment variable")
-endif
-
-# Default target, can be overwritten by command line or environment
-RTE_TARGET ?= x86_64-native-linuxapp-gcc
-
-include $(RTE_SDK)/mk/rte.vars.mk
-
 # library name
 LIB = libtle_misc.a
 
 CFLAGS += -O3
-CFLAGS += $(WERROR_FLAGS) -I$(SRCDIR)
+CFLAGS += $(WERROR_FLAGS) $(shell pkg-config --cflags libdpdk)
 
 EXPORT_MAP := tle_misc_version.map
 
@@ -33,4 +24,16 @@ LIBABIVER := 1
 SYMLINK-y-include += tle_dpdk_wrapper.h
 SYMLINK-y-include += tle_version.h
 
-include $(TLDK_ROOT)/mk/tle.lib.mk
+LDLIBS += $(shell pkg-config --libs libdpdk) -lpthread
+
+$(LIB): $(OBJS-y)
+	@echo "Creating $(LIB)"
+	$(Q)$(AR) cru $@ $^
+	$(Q)$(RANLIB) $@
+
+install: $(LIB)
+	$(Q)mkdir -p $(DESTDIR)$(libdir)
+	$(Q)install -m 644 $(LIB) $(DESTDIR)$(libdir)
+
+uninstall:
+	$(Q)rm -f $(DESTDIR)$(libdir)/$(LIB)

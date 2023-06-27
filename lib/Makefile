@@ -11,20 +11,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ifeq ($(RTE_SDK),)
-$(error "Please define RTE_SDK environment variable")
-endif
+DPDK_INCLUDE := $(shell pkg-config --cflags libdpdk)
+DPDK_LIBS := $(shell pkg-config --libs libdpdk)
 
-ifeq ($(TLDK_ROOT),)
-$(error "Please define TLDK_SDK environment variable")
-endif
+TLDK_ROOT := $(CURDIR)
+export TLDK_ROOT
 
-include $(RTE_SDK)/mk/rte.vars.mk
+DIRS := libtle_misc libtle_dring libtle_timer libtle_memtank libtle_l4p
 
-DIRS-y += libtle_misc
-DIRS-y += libtle_dring
-DIRS-y += libtle_timer
-DIRS-y += libtle_memtank
-DIRS-y += libtle_l4p
+.PHONY: all clean $(DIRS)
 
-include $(TLDK_ROOT)/mk/tle.subdir.mk
+all: $(DIRS)
+
+$(DIRS):
+	@echo "== $@"
+	$(Q)$(MAKE) -C $@ \
+		CFLAGS="$(CFLAGS) $(DPDK_INCLUDE)" \
+		LDLIBS="$(LDLIBS) $(DPDK_LIBS) -lpthread"
+
+libtle_dring: libtle_misc
+libtle_timer: libtle_misc libtle_dring
+libtle_memtank: libtle_misc libtle_dring libtle_timer
+libtle_l4p: libtle_misc libtle_dring libtle_timer libtle_memtank
+
+clean:
+	@for dir in $(DIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done

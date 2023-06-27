@@ -1,36 +1,20 @@
-# Copyright (c) 2016 Intel Corporation.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at:
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 TLDK_ROOT := $(CURDIR)
 export TLDK_ROOT
-
-LOCAL_RTE_SDK=$(TLDK_ROOT)/dpdk/_build/dpdk
-
-ifeq ($(RTE_SDK),)
-	export RTE_SDK=$(LOCAL_RTE_SDK)
-endif
 
 RTE_TARGET ?= x86_64-native-linuxapp-gcc
 
 DIRS-y += lib
 DIRS-y += examples
-DIRS-y += test
+# DIRS-y += test
 
 MAKEFLAGS += --no-print-directory
 
 # output directory
 O ?= $(TLDK_ROOT)/${RTE_TARGET}
 BASE_OUTPUT ?= $(abspath $(O))
+
+DPDK_INCLUDE := $(shell pkg-config --cflags libdpdk)
+DPDK_LIBS := $(shell pkg-config --libs libdpdk)
 
 .PHONY: all
 all: $(DIRS-y)
@@ -39,7 +23,7 @@ all: $(DIRS-y)
 clean: $(DIRS-y)
 
 .PHONY: $(DIRS-y)
-$(DIRS-y): $(RTE_SDK)/mk/rte.vars.mk
+$(DIRS-y):
 	@echo "== $@"
 	$(Q)$(MAKE) -C $(@) \
 		M=$(CURDIR)/$(@)/Makefile \
@@ -50,7 +34,10 @@ $(DIRS-y): $(RTE_SDK)/mk/rte.vars.mk
 		RTE_TARGET=$(RTE_TARGET) \
 		$(filter-out $(DIRS-y),$(MAKECMDGOALS))
 
-$(RTE_SDK)/mk/rte.vars.mk:
-ifeq ($(RTE_SDK),$(LOCAL_RTE_SDK))
-	@make RTE_TARGET=$(RTE_TARGET) config all -C $(TLDK_ROOT)/dpdk/
-endif
+.PHONY: check_dpdk
+check_dpdk:
+	@pkg-config --print-errors --exists libdpdk || (echo "DPDK library not found. Please install DPDK." && exit 1)
+
+CFLAGS += $(DPDK_INCLUDE)
+LDLIBS += $(DPDK_LIBS) -lpthread
+
