@@ -223,28 +223,6 @@ uint32_t tle_tcp_stream_update_cfg(struct tle_stream *ts[],
 	struct tle_tcp_stream_cfg prm[], uint32_t num);
 
 /**
- * Accept connection requests for the given stream.
- * Note that the stream has to be in listen state.
- * For each new connection a new stream will be open.
- * @param s
- *   TCP listen stream.
- * @param prm
- *   An array of *tle_tcp_accept_param* structures that
- *   contains at least *num* elements in it.
- * @param rs
- *   An array of pointers to *tle_stream* structures that
- *   must be large enough to store up to *num* pointers in it.
- * @param num
- *   Number of elements in the *prm* and *rs* arrays.
- * @return
- *   number of of entries filled inside *rs* array.
- *   In case of error, error code set in rte_errno.
- *   Possible rte_errno errors include:
- *   - EINVAL - invalid parameter passed to function
- *   - ENFILE - no more streams are avaialble to open.
- */
-
-/**
  * Return up to *num* mbufs that was received for given TCP stream.
  * Note that the stream has to be in connected state.
  * Data ordering is preserved.

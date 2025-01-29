@@ -6,3 +6,6 @@ x86_64-native-linuxapp-gcc/
 .idea
 .cproject
 .pydev*
+install
+build/
+.vscode/

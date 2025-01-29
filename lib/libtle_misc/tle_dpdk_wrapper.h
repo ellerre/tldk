@@ -24,6 +24,34 @@ extern "C" {
 
 #if RTE_VERSION >= RTE_VERSION_NUM(17, 5, 0, 0)
 
+#define DEQUEUE_PTRS(r, ring_start, cons_head, obj_table, n, obj_type) do { \
+       unsigned int i; \
+       uint32_t idx = cons_head & (r)->mask; \
+       const uint32_t size = (r)->size; \
+       obj_type *ring = (obj_type *)ring_start; \
+       if (likely(idx + n < size)) { \
+               for (i = 0; i < (n & ~0x3); i += 4, idx += 4) {\
+                       obj_table[i] = ring[idx]; \
+                       obj_table[i + 1] = ring[idx + 1]; \
+                       obj_table[i + 2] = ring[idx + 2]; \
+                       obj_table[i + 3] = ring[idx + 3]; \
+               } \
+               switch (n & 0x3) { \
+               case 3: \
+                       obj_table[i++] = ring[idx++]; /* fallthrough */ \
+               case 2: \
+                       obj_table[i++] = ring[idx++]; /* fallthrough */ \
+               case 1: \
+                       obj_table[i++] = ring[idx++]; \
+               } \
+       } else { \
+               for (i = 0; idx < size; i++, idx++) \
+                       obj_table[i] = ring[idx]; \
+               for (idx = 0; i < n; i++, idx++) \
+                       obj_table[i] = ring[idx]; \
+       } \
+} while (0)
+
 static inline uint32_t
 _rte_ring_mp_enqueue_bulk(struct rte_ring *r, void * const *obj_table,
 	uint32_t n)

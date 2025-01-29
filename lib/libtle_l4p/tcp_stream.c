@@ -275,7 +275,7 @@ tcp_init_streams(struct tle_ctx *ctx)
 		(RING_F_SP_ENQ |  RING_F_SC_DEQ);
 
 	calc_stream_szofs(ctx, &szofs);
-	TCP_LOG(NOTICE, "ctx:%p, caluclated stream size: %u\n",
+	TCP_LOG(NOTICE, "ctx:%p, calculated stream size: %u\n",
 		ctx, szofs.size);
 
 	ts = rte_zmalloc_socket(NULL, sizeof(*ts), RTE_CACHE_LINE_SIZE,
@@ -302,7 +302,7 @@ tcp_init_streams(struct tle_ctx *ctx)
 		if (ts->tsq == NULL || ts->tmr == NULL || ts->mts == NULL)
 			rc = -ENOMEM;
 
-		tle_memtank_dump(stdout, ts->mts, TLE_MTANK_DUMP_STAT);
+		//tle_memtank_dump(stdout, ts->mts, TLE_MTANK_DUMP_STAT);
 	}
 
 	if (rc != 0) {
