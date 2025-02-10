@@ -2009,6 +2009,14 @@ tle_tcp_tx_bulk(struct tle_dev *dev, struct rte_mbuf *pkt[], uint16_t num)
 	return n;
 }
 
+bool 
+tle_tcp_stream_tx_pending(const struct tle_stream *ts)
+{
+	struct tle_tcp_stream *s = TCP_STREAM(ts);
+	struct tle_dev *dev = s->tx.dst.dev;
+	return rte_ring_count(s->tx.q) || tle_dring_count(&dev->tx.dr);
+}
+
 static inline void
 stream_fill_pkt_info(const struct tle_tcp_stream *s, union pkt_info *pi)
 {

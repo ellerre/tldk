@@ -382,6 +382,16 @@ uint16_t tle_tcp_tx_bulk(struct tle_dev *dev, struct rte_mbuf *pkt[],
 	uint16_t num);
 
 /**
+ * Check whether a given TCP stream has any pending data yet to send.
+ * @param ts
+ *   TCP stream that could have pending tx data.
+ * @return
+ * 	 - true if there is pending data to send.
+ * 	 - false if there is no pending data to send.
+ */
+bool tle_tcp_stream_tx_pending(const struct tle_stream *ts);
+
+/**
  * perform internal processing for given TCP context.
  * Checks which timers are expired and performs the required actions
  * (retransmission/connection abort, etc.)
