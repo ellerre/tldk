@@ -5,6 +5,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(DPDK REQUIRED)
 find_package(Threads REQUIRED)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Include the directories for library headers
 include_directories(
