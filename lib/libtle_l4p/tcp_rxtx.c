@@ -671,8 +671,31 @@ sync_ack(struct tle_tcp_stream *s, const union pkt_info *pi,
 	/* reset mbuf's data contents. */
 	len = m->l2_len + m->l3_len + m->l4_len;
 	m->tx_offload = 0;
-	if (rte_pktmbuf_adj(m, len) == NULL)
+	
+	/* It may happen that the mbuf is split into more than one segment. In this case, it is possible that
+	*  part of the header (especially in handshakes) is in the next segment, but the mbuf has more space
+	*  available that is not used. Here, when possible, we try to use this space and a single mbuf, preserving
+	*  the original logic as much as possible.
+	*/
+	if (len > m->data_len) {
+		uint16_t len_max = ((struct rte_pktmbuf_pool_private *)rte_mempool_get_priv(m->pool))->mbuf_data_room_size;
+		if (m->nb_segs > 1 && len <= len_max && len <= m->pkt_len) {
+			m->data_len = m->pkt_len;
+			m->nb_segs = 1;
+			rte_pktmbuf_free(m->next);
+			m->next = NULL;
+		} else {
+			printf("[tle] rte_pktmbuf_adj failed. len=%u, data_len=%u, pool=%s\n",
+				len, m->data_len, m->pool->name);
+			return -EINVAL;
+		}
+	}
+
+	if (rte_pktmbuf_adj(m, len) == NULL) {
+		printf("[tle] rte_pktmbuf_adj failed. len=%u, data_len=%u, pool=%s\n",
+			len, m->data_len, m->pool->name);
 		return -EINVAL;
+	}
 
 	dev = dst.dev;
 	pid = get_ip_pid(dev, 1, type, (s->flags & TLE_CTX_FLAG_ST) != 0);
@@ -1855,6 +1878,7 @@ rx_syn(struct tle_dev *dev, uint32_t type, uint32_t ts,
 
 	s = rx_obtain_listen_stream(dev, &pi[0], type);
 	if (s == NULL) {
+		printf("[tle] Error: listen stream not found!\n");
 		for (i = 0; i != num; i++) {
 			rc[i] = ENOENT;
 			rp[i] = mb[i];
