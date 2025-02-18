@@ -388,8 +388,9 @@ stream_fill_dev(struct tle_ctx *ctx, struct tle_stream *s,
 		p = tle_pbm_find_range(pbm, pbm->blk, LPORT_END_BLK);
 		if (p == 0 && pbm->blk > LPORT_START_BLK)
 			p = tle_pbm_find_range(pbm, LPORT_START_BLK, pbm->blk);
-	} else if (tle_pbm_check(pbm, p) != 0)
-		return EEXIST;
+	}
+	//else if (tle_pbm_check(pbm, p) != 0)
+	//	return EEXIST;
 
 	if (p == 0)
 		return ENFILE;
