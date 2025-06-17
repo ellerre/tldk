@@ -14,6 +14,9 @@ add_library(tle_dring STATIC ${SOURCES})
 # Specify the include directories
 target_include_directories(tle_dring PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Link against the DPDK library
+target_link_libraries(tle_dring PUBLIC PkgConfig::DPDK)
+
 #Compile options
 target_compile_options(tle_dring
     PUBLIC "-mssse3"

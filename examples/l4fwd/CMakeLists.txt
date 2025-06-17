@@ -17,13 +17,13 @@ target_include_directories(l4fwd
 
 # Link the required libraries
 # IMPORTANT: The order of the libraries is important. You should order them by dependency: first the libraries that depend on others, then the libraries that are dependencies.
-set(TLDK_DIR ${CMAKE_SOURCE_DIR}/install/lib)
+set(TLDK_DIR ${CMAKE_SOURCE_DIR}/build/lib)
 target_link_libraries(l4fwd PUBLIC
-    ${TLDK_DIR}/libtle_l4p.a
-    ${TLDK_DIR}/libtle_dring.a
-    ${TLDK_DIR}/libtle_timer.a
-    ${TLDK_DIR}/libtle_memtank.a
-    ${DPDK_LIBRARIES}
+    ${TLDK_DIR}/libtle_l4p/libtle_l4p.a
+    ${TLDK_DIR}/libtle_dring/libtle_dring.a
+    ${TLDK_DIR}/libtle_timer/libtle_timer.a
+    ${TLDK_DIR}/libtle_memtank/libtle_memtank.a
+    PkgConfig::DPDK
 )
 
 # Set the compiler flags

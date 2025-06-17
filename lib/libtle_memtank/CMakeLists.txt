@@ -22,6 +22,9 @@ target_compile_options(tle_memtank
 )
 target_compile_features(tle_memtank PUBLIC c_std_11)
 
+# Link against the DPDK library
+target_link_libraries(tle_memtank PUBLIC PkgConfig::DPDK)
+
 # Install the library and header files
 install(
     TARGETS tle_memtank

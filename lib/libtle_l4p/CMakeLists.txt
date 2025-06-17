@@ -25,7 +25,7 @@ target_sources(tle_l4p PRIVATE
 target_include_directories(tle_l4p PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 #print out the dpdk libraries
-target_link_libraries(tle_l4p PUBLIC ${DPDK_LIBRARIES} "rt")
+target_link_libraries(tle_l4p PUBLIC PkgConfig::DPDK "rt")
 
 #Compile options
 target_compile_options(tle_l4p PUBLIC "-march=native" "-mssse3" PRIVATE "-Wall")
