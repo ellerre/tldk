@@ -30,7 +30,7 @@ add_subdirectory(lib/libtle_memtank)
 add_subdirectory(lib/libtle_l4p)
 
 # Compile the example
-add_subdirectory(examples)
+# add_subdirectory(examples)
 
 # Compile the tests
 # add_subdirectory(tests)
