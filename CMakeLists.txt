@@ -2,9 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 project(TLDK)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+find_package(DPDK REQUIRED)
 find_package(Threads REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(DPDK REQUIRED libdpdk)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
